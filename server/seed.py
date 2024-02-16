@@ -125,3 +125,10 @@ if __name__ == '__main__':
         db.create_all()
         seed_data()
         print("Data seeded successfully!")
+
+# {
+#   "description":"Come to swim with us",
+#   "category":""
+# }
+
+# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwODA4MjQ4OCwianRpIjoiZjJlMTQyOTItYzgyMS00OTg4LWFiODQtMTM4ZTI4MzBkMjRmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6NTEsIm5iZiI6MTcwODA4MjQ4OCwiY3NyZiI6IjBjZTM5YTc5LWExYTEtNDVlMi05ODlkLTJmNmRiMzQ5Y2M0MCIsImV4cCI6MTcwODE2ODg4OH0.odP6CZi4woGa9aGMfzmShLuV3B4dkolU_im9PrYTLOU

@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from models import db, Users, Events, Fun_times
+from models import db, Users, Events, Fun_times, Products, Likes, Comment_events, Comment_fun_times, Reviews
 from datetime import timedelta
 
 app = Flask(__name__)
@@ -116,7 +116,7 @@ def get_events():
 def add_event():
     current_user = get_jwt_identity()
     data = request.get_json()
-    new_event = Events(title=data['title'], description=data['description'], start_time=data['start_time'], end_time=data['end_time'], date_of_event=data['date_of_event'], user_id=current_user)
+    new_event = Events(title=data['title'], description=data['description'], start_time=data['start_time'], end_time=data['end_time'], date_of_event=data['date_of_event'], image_url=data.get('image_url'), user_id=current_user)
     db.session.add(new_event)
     db.session.commit()
     return jsonify({'message': 'New event created!'})
@@ -125,7 +125,7 @@ def add_event():
 @jwt_required()
 def update_event(event_id):
     current_user = get_jwt_identity()
-    event = Events.query.filter_by(id=event_id, author_id=current_user).first()
+    event = Events.query.filter_by(id=event_id, user_id=current_user).first()
     if not event:
         return jsonify({'message': 'Event not found or you are not authorized to update this event'}), 404
     data = request.get_json()
@@ -133,6 +133,7 @@ def update_event(event_id):
     event.description = data.get('description', event.description)
     event.start_time = data.get('start_time', event.start_time)
     event.end_time = data.get('end_time', event.end_time)
+    event.image_url = data.get('image_url', event.image_url)
     event.date_of_event = data.get('date_of_event', event.date_of_event)
     db.session.commit()
     return jsonify({'message': 'Event updated successfully'})
@@ -141,7 +142,7 @@ def update_event(event_id):
 @jwt_required()
 def delete_event(event_id):
     current_user = get_jwt_identity()
-    event = Events.query.filter_by(id=event_id, author_id=current_user).first()
+    event = Events.query.filter_by(id=event_id, user_id=current_user).first()
     if not event:
         return jsonify({'message': 'Event not found or you are not authorized to delete this event'}), 404
     db.session.delete(event)
@@ -160,7 +161,7 @@ def get_fun_times():
 def add_fun_time():
     current_user = get_jwt_identity()
     data = request.get_json()
-    new_fun_time = Fun_times(description=data['description'], category=data['category'], author_id=current_user)
+    new_fun_time = Fun_times(description=data['description'], category=data['category'], user_id=current_user)
     db.session.add(new_fun_time)
     db.session.commit()
     return jsonify({'message': 'New Fun-Time created!'})
@@ -169,7 +170,7 @@ def add_fun_time():
 @jwt_required()
 def update_fun_time(fun_time_id):
     current_user = get_jwt_identity()
-    fun_time = Fun_times.query.filter_by(id=fun_time_id, author_id=current_user).first()
+    fun_time = Fun_times.query.filter_by(id=fun_time_id, user_id=current_user).first()
     if not fun_time:
         return jsonify({'message': 'Fun-Time not found or you are not authorized to update this Fun-Time'}), 404
     data = request.get_json()
@@ -182,7 +183,7 @@ def update_fun_time(fun_time_id):
 @jwt_required()
 def delete_fun_time(fun_time_id):
     current_user = get_jwt_identity()
-    fun_time = Fun_times.query.filter_by(id=fun_time_id, author_id=current_user).first()
+    fun_time = Fun_times.query.filter_by(id=fun_time_id, user_id=current_user).first()
     if not fun_time:
         return jsonify({'message': 'Fun-Time not found or you are not authorized to delete this Fun-Time'}), 404
     db.session.delete(fun_time)
@@ -201,7 +202,7 @@ def most_liked_fun_time():
 @app.route('/marketplace', methods=['GET'])
 def get_marketplace():
     products = Products.query.all()
-    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url} for product in products]
+    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url, 'category': product.category} for product in products]
     return jsonify({'products': output})
 
 # Route to get a specific product by id
@@ -216,11 +217,12 @@ def get_product(product_id):
 @app.route('/create-product', methods=['POST'])
 def create_product():
     data = request.get_json()
-    new_product = Product(
+    new_product = Products(
         title=data['title'],
         description=data['description'],
         price=data['price'],
-        image_url=data['image_url']
+        image_url=data['image_url'], 
+        category=data['category']
     )
     db.session.add(new_product)
     db.session.commit()
@@ -254,35 +256,35 @@ def delete_product(product_id):
 @app.route('/marketplace/tech', methods=['GET'])
 def get_tech_category():
     tech_products = Products.query.filter_by(category='Tech').all()
-    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url} for product in tech_products]
+    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url, 'category': product.category} for product in tech_products]
     return jsonify({'products': output})
 
 # Route to the food category in the market place
 @app.route('/marketplace/food', methods=['GET'])
 def get_food_category():
     food_products = Products.query.filter_by(category='Food').all()
-    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url} for product in food_products]
+    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url, 'category': product.category} for product in food_products]
     return jsonify({'products': output})
 
 # Route to accesories category in the market place
 @app.route('/marketplace/accessories', methods=['GET'])
 def get_accessories_category():
     accessories_products = Products.query.filter_by(category='Accessories').all()
-    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url} for product in accessories_products]
+    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url, 'category': product.category} for product in accessories_products]
     return jsonify({'products': output})
 
 # Route to clothing category in the market place
 @app.route('/marketplace/clothing', methods=['GET'])
 def get_clothing_category():
     clothing_products = Products.query.filter_by(category='Clothing').all()
-    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url} for product in clothing_products]
+    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url, 'category': product.category} for product in clothing_products]
     return jsonify({'products': output})
 
 # Route to art category in the market place
 @app.route('/marketplace/art', methods=['GET'])
 def get_art_category():
     art_products = Products.query.filter_by(category='Art').all()
-    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url} for product in art_products]
+    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url, 'category': product.category} for product in art_products]
     return jsonify({'products': output})
 
 
