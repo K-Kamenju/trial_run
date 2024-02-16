@@ -197,5 +197,94 @@ def most_liked_fun_time():
         return jsonify({'message': 'No Fun-Time found'}), 404
     return jsonify({'most_liked_fun_time': {'id': most_liked.id, 'description': most_liked.description, 'category': most_liked.category}})
 
+# Route to get all products for the market place
+@app.route('/marketplace', methods=['GET'])
+def get_marketplace():
+    products = Products.query.all()
+    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url} for product in products]
+    return jsonify({'products': output})
+
+# Route to get a specific product by id
+@app.route('/product/<int:product_id>', methods=['GET'])
+def get_product(product_id):
+    product = Products.query.filter_by(id=product_id).first()
+    if not product:
+        return jsonify({'message': 'Product not found'}), 404
+    return jsonify({'product': {'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url}})
+
+# Route to create a new product
+@app.route('/create-product', methods=['POST'])
+def create_product():
+    data = request.get_json()
+    new_product = Product(
+        title=data['title'],
+        description=data['description'],
+        price=data['price'],
+        image_url=data['image_url']
+    )
+    db.session.add(new_product)
+    db.session.commit()
+    return jsonify({'message': 'Product created successfully'})
+
+# Route to update a product
+@app.route('/update-product/<int:product_id>', methods=['PUT'])
+def update_product(product_id):
+    product = Products.query.filter_by(id=product_id).first()
+    if not product:
+        return jsonify({'message': 'Product not found'}), 404
+    data = request.get_json()
+    product.title = data.get('title', product.title)
+    product.description = data.get('description', product.description)
+    product.price = data.get('price', product.price)
+    product.image_url = data.get('image_url', product.image_url)
+    db.session.commit()
+    return jsonify({'message': 'Product updated successfully'})
+
+# Route to delete a product
+@app.route('/delete-product/<int:product_id>', methods=['DELETE'])
+def delete_product(product_id):
+    product = Products.query.filter_by(id=product_id).first()
+    if not product:
+        return jsonify({'message': 'Product not found'}), 404
+    db.session.delete(product)
+    db.session.commit()
+    return jsonify({'message': 'Product deleted successfully'})
+
+# Route to the tech category in the market place
+@app.route('/marketplace/tech', methods=['GET'])
+def get_tech_category():
+    tech_products = Products.query.filter_by(category='Tech').all()
+    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url} for product in tech_products]
+    return jsonify({'products': output})
+
+# Route to the food category in the market place
+@app.route('/marketplace/food', methods=['GET'])
+def get_food_category():
+    food_products = Products.query.filter_by(category='Food').all()
+    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url} for product in food_products]
+    return jsonify({'products': output})
+
+# Route to accesories category in the market place
+@app.route('/marketplace/accessories', methods=['GET'])
+def get_accessories_category():
+    accessories_products = Products.query.filter_by(category='Accessories').all()
+    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url} for product in accessories_products]
+    return jsonify({'products': output})
+
+# Route to clothing category in the market place
+@app.route('/marketplace/clothing', methods=['GET'])
+def get_clothing_category():
+    clothing_products = Products.query.filter_by(category='Clothing').all()
+    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url} for product in clothing_products]
+    return jsonify({'products': output})
+
+# Route to art category in the market place
+@app.route('/marketplace/art', methods=['GET'])
+def get_art_category():
+    art_products = Products.query.filter_by(category='Art').all()
+    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url} for product in art_products]
+    return jsonify({'products': output})
+
+
 if __name__ == '__main__':
     app.run(debug=True)

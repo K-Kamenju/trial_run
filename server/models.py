@@ -43,9 +43,9 @@ class Events(db.Model):
     title = db.Column(db.String(255))
     description = db.Column(db.String(255))
     image_url = db.Column(db.String(255))
-    start_time = db.Column(db.Integer)
-    end_time = db.Column(db.Integer)
-    date_of_event = db.Column(db.Integer)
+    start_time = db.Column(db.DateTime)
+    end_time = db.Column(db.DateTime)
+    date_of_event = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
     
