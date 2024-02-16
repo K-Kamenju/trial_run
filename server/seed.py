@@ -17,6 +17,7 @@ def seed_data():
             last_name=fake.last_name(),
             email=fake.email(),
             phone_no=fake.phone_number(),
+            password=fake.password(),
             category='user',
             image_url='https://example.com/john.jpg',
             gender=random.choice(['male', 'female']),
@@ -37,7 +38,6 @@ def seed_data():
             description=fake.sentence(),
             image_url=fake.image_url(),
             price=random.randint(10, 1000),
-            rating=random.randint(1, 5),
             category=random.choice(product_categories),
             wishlist=random.choice([True, False]),
             created_at=datetime.now(),
@@ -53,6 +53,7 @@ def seed_data():
             review = Reviews(
                 text=fake.paragraph(),
                 user_id=random.randint(1, 50),
+                rating=random.randint(1, 5),
                 product_id=product.id
             )
             db.session.add(review)
@@ -124,3 +125,10 @@ if __name__ == '__main__':
         db.create_all()
         seed_data()
         print("Data seeded successfully!")
+
+# {
+#   "description":"Come to swim with us",
+#   "category":""
+# }
+
+# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwODA4MjQ4OCwianRpIjoiZjJlMTQyOTItYzgyMS00OTg4LWFiODQtMTM4ZTI4MzBkMjRmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6NTEsIm5iZiI6MTcwODA4MjQ4OCwiY3NyZiI6IjBjZTM5YTc5LWExYTEtNDVlMi05ODlkLTJmNmRiMzQ5Y2M0MCIsImV4cCI6MTcwODE2ODg4OH0.odP6CZi4woGa9aGMfzmShLuV3B4dkolU_im9PrYTLOU
