@@ -15,10 +15,10 @@ class Users(db.Model):
     updated_at = db.Column(db.DateTime)
     
     # Relationships
-    posted_events = db.relationship('Events', backref='author', lazy=True)
-    posted_fun_times = db.relationship('Fun_times', backref='author', lazy=True)
-    comments_on_events = db.relationship('Comment_events', backref='commenter', lazy=True)
-    comments_on_fun_times = db.relationship('Comment_fun_times', backref='commenter', lazy=True)
+    posted_events = db.relationship('Events', backref='user', lazy=True)
+    posted_fun_times = db.relationship('Fun_times', backref='user', lazy=True)
+    comments_on_events = db.relationship('Comment_events', backref='user', lazy=True)
+    comments_on_fun_times = db.relationship('Comment_fun_times', backref='user', lazy=True)
 
     products = db.relationship('Products', backref='user', lazy=True)
     reviews = db.relationship('Reviews', backref='user', lazy=True)
