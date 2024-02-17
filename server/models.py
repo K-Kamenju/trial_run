@@ -30,7 +30,7 @@ class Users(db.Model, SerializerMixin):
 
 class Events(db.Model, SerializerMixin):
     
-    serialize_rules = ('-users.events',)
+    serialize_rules = ('-users.events','-comments.event',)
     
     
     id = db.Column(db.Integer, primary_key=True)
@@ -49,7 +49,7 @@ class Events(db.Model, SerializerMixin):
 
 class Products(db.Model, SerializerMixin):
     
-    serialize_rules = ('-users.products',)
+    serialize_rules = ('-users.products', '-reviews.product',)
     
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255))
@@ -67,7 +67,7 @@ class Products(db.Model, SerializerMixin):
 
 class Fun_times(db.Model, SerializerMixin):
     
-    serialize_rules = ('-users.fun_times',)
+    serialize_rules = ('-users.fun_times','-comments.fun_time', '-likes.fun_time',)
     
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(255))
@@ -80,14 +80,17 @@ class Fun_times(db.Model, SerializerMixin):
     comments = db.relationship('Comment_fun_times', backref='fun_time', lazy=True) 
     likes = db.relationship('Likes', backref='fun_time', lazy=True)
 
-class Likes(db.Model):
+class Likes(db.Model, SerializerMixin):
+    
+    serialize_rules =('-funtimes.likes')
+    
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     fun_time_id = db.Column(db.Integer, db.ForeignKey('fun_times.id'))
 
 class Comment_events(db.Model, SerializerMixin):
     
-    serialize_rules=('-users.comment_events',)
+    serialize_rules=('-users.comment_events','-events.comment_events',)
     
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(255))
@@ -96,7 +99,7 @@ class Comment_events(db.Model, SerializerMixin):
 
 class Comment_fun_times(db.Model, SerializerMixin):
     
-    serialize_rules=('-users.comment_fun_times',)
+    serialize_rules=('-users.comment_fun_times','-fun_times.comment_fun_times',)
     
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(255))
@@ -105,7 +108,7 @@ class Comment_fun_times(db.Model, SerializerMixin):
 
 class Reviews(db.Model, SerializerMixin):
     
-    serialize_rules=('-users.reviews',)
+    serialize_rules=('-users.reviews','-products.reviews',)
     
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(255))

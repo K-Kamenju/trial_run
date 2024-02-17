@@ -195,7 +195,20 @@ def delete_event(event_id):
 @app.route('/fun_times', methods=['GET'])
 def get_fun_times():
     fun_times = Fun_times.query.all()
-    output = [{'id': fun_time.id, 'description': fun_time.description, 'image_url':fun_time.image_url, 'category': fun_time.category} for fun_time in fun_times]
+    
+    
+    output = [{
+        'id': fun_time.id, 
+        'description': fun_time.description, 
+        'image_url':fun_time.image_url, 
+        'category': fun_time.category,
+        'comments':[{
+            'id': comment.id,
+            'text': comment.text,      
+        }for comment in fun_time.comments]
+        } for fun_time in fun_times]
+    
+    
     return jsonify({'fun_times': output})
 
 @app.route('/add-fun_time', methods=['POST'])
