@@ -203,7 +203,7 @@ def get_fun_times():
 def add_fun_time():
     current_user = get_jwt_identity()
     data = request.get_json()
-    new_fun_time = Fun_times(description=data['description'], category=data['category'], user_id=current_user)
+    new_fun_time = Fun_times(description=data['description'], image_url=data['image_url'], category=data['category'], user_id=current_user)
     db.session.add(new_fun_time)
     db.session.commit()
     return jsonify({'message': 'New Fun-Time created!'})
