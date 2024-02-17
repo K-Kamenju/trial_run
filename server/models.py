@@ -5,7 +5,7 @@ db = SQLAlchemy()
 
 class Users(db.Model, SerializerMixin):
     
-    serialize_rules = ('-posted_events.user','-posted_fun_times.user','-comments_on_events.user', '-comments_on_fun_times.user','-products.user',)
+    serialize_rules = ('-events.user','-fun_times.user','-comments_on_events.user', '-comments_on_fun_times.user','-products.user','-reviews.user',)
     
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(255))
@@ -16,12 +16,13 @@ class Users(db.Model, SerializerMixin):
     category = db.Column(db.String(50))
     image_url = db.Column(db.String(255))
     gender = db.Column(db.String(10))
+    password = db.Column(db.String(55))
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
     
     # Relationships
-    posted_events = db.relationship('Events', backref='user', lazy=True)
-    posted_fun_times = db.relationship('Fun_times', backref='user', lazy=True)
+    events = db.relationship('Events', backref='user', lazy=True)
+    fun_times = db.relationship('Fun_times', backref='user', lazy=True)
     comments_on_events = db.relationship('Comment_events', backref='user', lazy=True)
     comments_on_fun_times = db.relationship('Comment_fun_times', backref='user', lazy=True)
     products = db.relationship('Products', backref='user', lazy=True)
@@ -84,19 +85,28 @@ class Likes(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     fun_time_id = db.Column(db.Integer, db.ForeignKey('fun_times.id'))
 
-class Comment_events(db.Model):
+class Comment_events(db.Model, SerializerMixin):
+    
+    serialize_rules=('-users.comment_events',)
+    
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
-class Comment_fun_times(db.Model):
+class Comment_fun_times(db.Model, SerializerMixin):
+    
+    serialize_rules=('-users.comment_fun_times',)
+    
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     fun_times_id = db.Column(db.Integer, db.ForeignKey('fun_times.id'))
 
-class Reviews(db.Model):
+class Reviews(db.Model, SerializerMixin):
+    
+    serialize_rules=('-users.reviews',)
+    
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
