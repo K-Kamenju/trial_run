@@ -150,7 +150,19 @@ def update_profile():
 @app.route('/events', methods=['GET'])
 def get_events():
     events = Events.query.all()
-    output = [{'id': event.id, 'title': event.title, 'description': event.description, 'start_time': event.start_time, 'end_time': event.end_time, 'date_of_event': event.date_of_event} for event in events]
+    output = [{
+        'id': event.id, 
+        'title': event.title, 
+        'description': event.description, 
+        'start_time': event.start_time, 
+        'end_time': event.end_time, 
+        'date_of_event': event.date_of_event,
+        'comments':[{
+            'id': comment.id,
+            'text': comment.text,     
+        } for comment in event.comments]
+
+        } for event in events]
     return jsonify({'events': output})
 
 @app.route('/add-event', methods=['POST'])
@@ -257,7 +269,15 @@ def most_liked_fun_time():
 @app.route('/marketplace', methods=['GET'])
 def get_marketplace():
     products = Products.query.all()
-    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url, 'category': product.category} for product in products]
+    output = [{
+        'id': product.id, 
+        'title': product.title, 
+        'description': product.description,
+        'price': product.price, 
+        'image_url': product.image_url, 
+        'category': product.category,
+        
+        } for product in products]
     return jsonify({'products': output})
 
 # Route to get a specific product by id
@@ -266,7 +286,17 @@ def get_product(product_id):
     product = Products.query.filter_by(id=product_id).first()
     if not product:
         return jsonify({'message': 'Product not found'}), 404
-    return jsonify({'product': {'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url}})
+    return jsonify({'product': {
+        'id': product.id, 
+        'title': product.title, 
+        'description': product.description, 
+        'price': product.price,
+        'image_url': product.image_url,
+        'reviews':[{
+            'id': review.id,
+            'text': review.text
+        } for review in product.reviews]
+        }})
 
 # Route to create a new product
 @app.route('/create-product', methods=['POST'])
