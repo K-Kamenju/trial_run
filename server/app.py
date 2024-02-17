@@ -257,14 +257,18 @@ def get_product(product_id):
 
 # Route to create a new product
 @app.route('/create-product', methods=['POST'])
+@jwt_required()
 def create_product():
+    current_user = get_jwt_identity()
     data = request.get_json()
     new_product = Products(
         title=data['title'],
         description=data['description'],
         price=data['price'],
         image_url=data['image_url'], 
-        category=data['category']
+        category=data['category'],
+        user_id= current_user
+        
     )
     db.session.add(new_product)
     db.session.commit()
