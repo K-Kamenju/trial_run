@@ -159,7 +159,8 @@ def get_events():
         'date_of_event': event.date_of_event,
         'comments':[{
             'id': comment.id,
-            'text': comment.text,     
+            'text': comment.text, 
+            'username': comment.user.last_name    
         } for comment in event.comments]
 
         } for event in events]
@@ -216,7 +217,8 @@ def get_fun_times():
         'category': fun_time.category,
         'comments':[{
             'id': comment.id,
-            'text': comment.text,      
+            'text': comment.text,  
+            'username': comment.user.last_name    
         }for comment in fun_time.comments]
         } for fun_time in fun_times]
     
