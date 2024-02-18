@@ -21,8 +21,10 @@ def seed_data():
             category='user',
             image_url='https://example.com/john.jpg',
             gender=random.choice(['male', 'female']),
+            password=fake.password(),
             created_at=datetime.now(),
-            updated_at=datetime.now()
+            updated_at=datetime.now(),
+            student_id=fake.phone_number()
         )
         db.session.add(user)
     db.session.commit()

@@ -7,7 +7,7 @@ from models import db, Users, Events, Fun_times, Products, Likes, Comment_events
 from datetime import timedelta
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'vsgewvwesvsgevafdsag'  
 app.config['JWT_SECRET_KEY'] = 'vsgewvwesvsgevafdsag'
@@ -29,6 +29,7 @@ def signup():
     new_user = Users(
         first_name=data['first_name'],
         last_name=data['last_name'],
+        student_id = data['student_id'],
         email=data['email'],
         password=data['password'],
         phone_no=data['phone_no'],
@@ -63,7 +64,7 @@ def get_user(user_id):
 @jwt_required()
 def reset_password():
     current_user = get_jwt_identity()
-    user = Users.query.filter_by(id=current_user_id).first()
+    user = Users.query.filter_by(id=current_user).first()
     if not user:
         return jsonify({'message': 'User not found'}), 404
     
@@ -82,7 +83,48 @@ def profile():
     current_user = get_jwt_identity()
     user = Users.query.filter_by(id=current_user).first()
     if user:
-        return jsonify({'user': {'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}})
+        
+        event_dict=[{
+            'id': event.id, 
+            'title': event.title, 
+            'description': event.description, 
+            'start_time': event.start_time, 
+            'end_time': event.end_time, 
+            'date_of_event': event.date_of_event     
+        } for event in user.events]
+        
+        funtime_dict=[{
+            'id': fun_time.id, 
+            'description': fun_time.description, 
+            'image_url': fun_time.image_url,
+            'category': fun_time.category
+            
+        } for fun_time in user.fun_times]   
+        
+        product_dict = [{
+            'id': product.id, 
+            'title': product.title, 
+            'description': product.description, 
+            'price': product.price, 
+            'image_url': product.image_url, 
+            'category': product.category     
+        } for product in user.products]     
+        
+        
+        return jsonify({'user': {
+            'id': user.id,
+            'first_name': user.first_name, 
+            'last_name': user.last_name, 
+            'email': user.email, 
+            'student_id':user.student_id, 
+            'category':user.category,
+            'phone_no':user.phone_no, 
+            'gender':user.gender, 
+            'image_url':user.image_url,
+            'posted_events': event_dict,
+            'posted_fun_times': funtime_dict,
+            'products': product_dict
+            }})
     else:
         return jsonify(message="User not found"), 404
 
@@ -108,7 +150,20 @@ def update_profile():
 @app.route('/events', methods=['GET'])
 def get_events():
     events = Events.query.all()
-    output = [{'id': event.id, 'title': event.title, 'description': event.description, 'start_time': event.start_time, 'end_time': event.end_time, 'date_of_event': event.date_of_event} for event in events]
+    output = [{
+        'id': event.id, 
+        'title': event.title, 
+        'description': event.description, 
+        'start_time': event.start_time, 
+        'end_time': event.end_time, 
+        'date_of_event': event.date_of_event,
+        'comments':[{
+            'id': comment.id,
+            'text': comment.text, 
+            'username': comment.user.last_name    
+        } for comment in event.comments]
+
+        } for event in events]
     return jsonify({'events': output})
 
 @app.route('/add-event', methods=['POST'])
@@ -153,7 +208,21 @@ def delete_event(event_id):
 @app.route('/fun_times', methods=['GET'])
 def get_fun_times():
     fun_times = Fun_times.query.all()
-    output = [{'id': fun_time.id, 'description': fun_time.description, 'category': fun_time.category} for fun_time in fun_times]
+    
+    
+    output = [{
+        'id': fun_time.id, 
+        'description': fun_time.description, 
+        'image_url':fun_time.image_url, 
+        'category': fun_time.category,
+        'comments':[{
+            'id': comment.id,
+            'text': comment.text,  
+            'username': comment.user.last_name    
+        }for comment in fun_time.comments]
+        } for fun_time in fun_times]
+    
+    
     return jsonify({'fun_times': output})
 
 @app.route('/add-fun_time', methods=['POST'])
@@ -161,7 +230,7 @@ def get_fun_times():
 def add_fun_time():
     current_user = get_jwt_identity()
     data = request.get_json()
-    new_fun_time = Fun_times(description=data['description'], category=data['category'], user_id=current_user)
+    new_fun_time = Fun_times(description=data['description'], image_url=data['image_url'], category=data['category'], user_id=current_user)
     db.session.add(new_fun_time)
     db.session.commit()
     return jsonify({'message': 'New Fun-Time created!'})
@@ -202,7 +271,15 @@ def most_liked_fun_time():
 @app.route('/marketplace', methods=['GET'])
 def get_marketplace():
     products = Products.query.all()
-    output = [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url, 'category': product.category} for product in products]
+    output = [{
+        'id': product.id, 
+        'title': product.title, 
+        'description': product.description,
+        'price': product.price, 
+        'image_url': product.image_url, 
+        'category': product.category,
+        
+        } for product in products]
     return jsonify({'products': output})
 
 # Route to get a specific product by id
@@ -211,18 +288,32 @@ def get_product(product_id):
     product = Products.query.filter_by(id=product_id).first()
     if not product:
         return jsonify({'message': 'Product not found'}), 404
-    return jsonify({'product': {'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image_url}})
+    return jsonify({'product': {
+        'id': product.id, 
+        'title': product.title, 
+        'description': product.description, 
+        'price': product.price,
+        'image_url': product.image_url,
+        'reviews':[{
+            'id': review.id,
+            'text': review.text
+        } for review in product.reviews]
+        }})
 
 # Route to create a new product
 @app.route('/create-product', methods=['POST'])
+@jwt_required()
 def create_product():
+    current_user = get_jwt_identity()
     data = request.get_json()
     new_product = Products(
         title=data['title'],
         description=data['description'],
         price=data['price'],
         image_url=data['image_url'], 
-        category=data['category']
+        category=data['category'],
+        user_id= current_user
+        
     )
     db.session.add(new_product)
     db.session.commit()
