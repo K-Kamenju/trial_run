@@ -328,6 +328,33 @@ def comment_event(event_id):
     
     return jsonify({'message': 'Comment added successfully'})
 
+
+@app.route('/update-comment-event/<int:comment_id>', methods=['PUT'])
+@jwt_required()
+def update_comment_event(comment_id):
+    current_user = get_jwt_identity()
+    comment = Comment_events.query.get(comment_id)
+    
+    if not comment:
+        return jsonify({'message': 'Comment not found'}), 404
+    
+    if comment.user_id != current_user:
+        return jsonify({'message': 'You are not authorized to update this comment'}), 403
+    
+    data = request.get_json()
+    new_comment_text = data.get('text')
+    
+    if not new_comment_text:
+        return jsonify({'message': 'New comment text is required'}), 400
+    
+    comment.text = new_comment_text
+    db.session.commit()
+    
+    return jsonify({'message': 'Comment updated successfully'})
+
+
+
+
 @app.route('/delete-comment-event/<int:comment_id>', methods=['DELETE'])
 @jwt_required()
 def delete_comment(comment_id):
@@ -608,6 +635,31 @@ def comment_fun_time(fun_time_id):
     
     return jsonify({'message': 'Comment added successfully'})
 
+
+@app.route('/update-comment-fun_time/<int:comment_id>', methods=['PUT'])
+@jwt_required()
+def update_comment_fun_time(comment_id):
+    current_user = get_jwt_identity()
+    comment = Comment_fun_times.query.get(comment_id)
+    
+    if not comment:
+        return jsonify({'message': 'Comment not found'}), 404
+    
+    if comment.user_id != current_user:
+        return jsonify({'message': 'You are not authorized to update this comment'}), 403
+    
+    data = request.get_json()
+    new_comment_text = data.get('text')
+    
+    if not new_comment_text:
+        return jsonify({'message': 'New comment text is required'}), 400
+    
+    comment.text = new_comment_text
+    db.session.commit()
+    
+    return jsonify({'message': 'Comment updated successfully'})
+
+
 @app.route('/delete-comment-fun_time/<int:comment_id>', methods=['DELETE'])
 @jwt_required()
 def delete_comment_fun_time(comment_id):
@@ -828,7 +880,7 @@ def get_my_products():
                 'username': review.user.username,  # Get the username of the user who posted the review
                 'user_image_url': review.user.image_url  # Get the image URL of the user who posted the review
             }
-        reviews.append(review_data)
+            reviews.append(review_data)  # <-- Correct indentation
         
         product_data = {
             'id': product.id,
@@ -842,7 +894,6 @@ def get_my_products():
         }
         output.append(product_data)
     return jsonify({'my_products': output})
-
 
 # Route to create a new product
 @app.route('/create-product', methods=['POST'])
@@ -963,6 +1014,157 @@ def get_clothing_category():
 def get_art_category():
     return jsonify({'products': get_products_by_category('Art')})
 
+# Route to get the highest-rated product
+@app.route('/marketplace/highest-rated', methods=['GET'])
+def get_highest_rated_product():
+    products = Products.query.all()
+
+    # Calculate average ratings for all products
+    product_ratings = []
+    for product in products:
+        average_rating = db.session.query(func.avg(Reviews.rating)).filter(Reviews.product_id == product.id).scalar()
+        if average_rating is None:
+            average_rating = 0
+        product_ratings.append((product, average_rating))
+
+    # Sort products by average rating in descending order
+    sorted_products = sorted(product_ratings, key=lambda x: x[1], reverse=True)
+
+    # Get the highest-rated product
+    highest_rated_product = sorted_products[0]
+
+    # Prepare the response
+    product_data = {
+        'id': highest_rated_product[0].id,
+        'title': highest_rated_product[0].title,
+        'description': highest_rated_product[0].description,
+        'price': highest_rated_product[0].price,
+        'image_url': highest_rated_product[0].image_url,
+        'category': highest_rated_product[0].category,
+        'average_rating': round(highest_rated_product[1], 1),  # Round the average rating to one decimal place
+        'reviews': [
+            {
+                'id': review.id,
+                'text': review.text,
+                'rating': review.rating,
+                'username': review.user.username,
+                'user_image_url': review.user.image_url
+            }
+            for review in highest_rated_product[0].reviews
+        ]
+    }
+
+    return jsonify({'highest_rated_product': product_data})
+
+
+# Route to rate a product
+@app.route('/product/<int:product_id>/rate', methods=['POST'])
+@jwt_required()
+def rate_product(product_id):
+    current_user = get_jwt_identity()
+    data = request.get_json()
+    rating = data.get('rating')
+
+    if rating is None or not isinstance(rating, (int, float)) or rating < 0 or rating > 5:
+        return jsonify({'message': 'Invalid rating. Rating must be a number between 0 and 5.'}), 400
+
+    product = Products.query.get(product_id)
+    if not product:
+        return jsonify({'message': 'Product not found'}), 404
+
+    existing_review = Reviews.query.filter_by(user_id=current_user, product_id=product_id).first()
+    if existing_review:
+        existing_review.rating = rating
+    else:
+        new_review = Reviews(
+            rating=rating,
+            user_id=current_user,
+            product_id=product_id
+        )
+        db.session.add(new_review)
+
+    db.session.commit()
+    return jsonify({'message': 'Product rated successfully'}), 200
+
+
+# Route to add a review
+@app.route('/product/<int:product_id>/review', methods=['POST'])
+@jwt_required()
+def add_review(product_id):
+    current_user = get_jwt_identity()
+    product = Products.query.get(product_id)
+    
+    if not product:
+        return jsonify({'message': 'Product not found'}), 404
+    
+    data = request.get_json()
+    review_text = data.get('text')
+    rating = data.get('rating')
+    
+    if not review_text:
+        return jsonify({'message': 'Review text is required'}), 400
+    
+    if not isinstance(rating, (int, float)) or not (0 <= rating <= 5):
+        return jsonify({'message': 'Rating must be a number between 0 and 5'}), 400
+    
+    new_review = Reviews(
+        text=review_text,
+        rating=rating,
+        user_id=current_user,
+        product_id=product_id
+    )
+    
+    db.session.add(new_review)
+    db.session.commit()
+    
+    return jsonify({'message': 'Review added successfully'})
+
+
+# Route to update a review
+@app.route('/review/<int:review_id>', methods=['PUT'])
+@jwt_required()
+def update_review(review_id):
+    current_user = get_jwt_identity()
+    review = Reviews.query.get(review_id)
+
+    if not review:
+        return jsonify({'message': 'Review not found'}), 404
+
+    if review.user_id != current_user:
+        return jsonify({'message': 'Unauthorized to update this review'}), 403
+
+    data = request.get_json()
+    text = data.get('text')
+    rating = data.get('rating')
+
+    if not text:
+        return jsonify({'message': 'Review text is required'}), 400
+
+    review.text = text
+    review.rating = rating
+    db.session.commit()
+
+    return jsonify({'message': 'Review updated successfully'}), 200
+
+
+# Route to delete a review
+@app.route('/review/<int:review_id>', methods=['DELETE'])
+@jwt_required()
+def delete_review(review_id):
+    current_user = get_jwt_identity()
+    review = Reviews.query.get(review_id)
+
+    if not review:
+        return jsonify({'message': 'Review not found'}), 404
+
+    if review.user_id != current_user:
+        return jsonify({'message': 'Unauthorized to delete this review'}), 403
+
+    db.session.delete(review)
+    db.session.commit()
+    return jsonify({'message': 'Review deleted successfully'}), 200
+
+
 
 # Wishlist Routes
 @app.route('/wishlists/add/<int:product_id>', methods=['POST'])
@@ -987,7 +1189,7 @@ def get_wishlists():
         product = Products.query.get(item.product_id)
         user = Users.query.get(product.user_id)
         wishlists.append({
-            'product_id': product.id,
+            'wishlists_item_id': item.id,
             'product_title': product.title,
             'product_description': product.description,
             'product_price': product.price,
@@ -1030,8 +1232,36 @@ START OF STUDENT ROUTES
 
 '''
 
+def get_users_by_category(category):
+    users = Users.query.filter_by(category=category).all()
+    serialized_users = [{
+        'id': user.id,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'username': user.username,
+        'email': user.email,
+        'phone_no': user.phone_no,
+        'image_url': user.image_url,
+        'gender': user.gender
+    } for user in users]
+    return serialized_users
 
 
+@app.route('/users/category/software_dev', methods=['GET'])
+def get_software_dev():
+    return jsonify({'users': get_users_by_category('Software Dev')})
+
+@app.route('/users/category/data_science', methods=['GET'])
+def get_data_science():
+    return jsonify({'users': get_users_by_category('Data Science')})
+
+@app.route('/users/category/cybersec', methods=['GET'])
+def get_cybersec():
+    return jsonify({'users': get_users_by_category('Cybersec')})
+
+@app.route('/users/category/ui_ux', methods=['GET'])
+def get_ui_ux():
+    return jsonify({'users': get_users_by_category('UI/UX')})
 
 
 
