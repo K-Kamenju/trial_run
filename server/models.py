@@ -1,5 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-<<<<<<< HEAD
 from sqlalchemy.orm import validates
 from sqlalchemy import MetaData, UniqueConstraint, ForeignKey, Table
 
@@ -13,9 +12,8 @@ db = SQLAlchemy(metadata =  metadata)
 
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-=======
+
 from sqlalchemy_serializer import SerializerMixin
->>>>>>> 0c767b619c8ea695816db717bd425a067640d0ae
 
 db = SQLAlchemy()
 
@@ -24,7 +22,7 @@ class Users(db.Model, SerializerMixin):
     serialize_rules = ('-events.user','-fun_times.user','-comments_on_events.user', '-comments_on_fun_times.user','-products.user','-reviews.user',)
     
     id = db.Column(db.Integer, primary_key=True)
-<<<<<<< HEAD
+    
     first_name = db.Column(db.String(255), nullable=False)
     last_name = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
@@ -36,7 +34,6 @@ class Users(db.Model, SerializerMixin):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-=======
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
     student_id = db.Column(db.String(100))
@@ -48,7 +45,6 @@ class Users(db.Model, SerializerMixin):
     password = db.Column(db.String(55))
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
->>>>>>> 0c767b619c8ea695816db717bd425a067640d0ae
     
     # Relationships
     events = db.relationship('Events', backref='user', lazy=True)
@@ -67,22 +63,18 @@ class Events(db.Model, SerializerMixin):
     title = db.Column(db.String(255))
     description = db.Column(db.String(255))
     image_url = db.Column(db.String(255))
-<<<<<<< HEAD
     start_time = db.Column(db.Integer)
     end_time = db.Column(db.Integer)
     date_of_event= db.Column(db.Integer)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-=======
     start_time = db.Column(db.String(100))
     end_time = db.Column(db.String(100))
     date_of_event = db.Column(db.String(100))
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
->>>>>>> 0c767b619c8ea695816db717bd425a067640d0ae
-    
     comments = db.relationship('Comment_events', backref='event', lazy=True)
     
 
@@ -112,16 +104,13 @@ class Fun_times(db.Model, SerializerMixin):
     description = db.Column(db.String(255))
     image_url = db.Column(db.String(255))
     category = db.Column(db.String(50))
-<<<<<<< HEAD
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     
     comments = db.relationship('Comment_fun_times', backref='fun_time', lazy=True)
-=======
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
->>>>>>> 0c767b619c8ea695816db717bd425a067640d0ae
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     
     comments = db.relationship('Comment_fun_times', backref='fun_time', lazy=True) 
