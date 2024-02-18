@@ -68,6 +68,7 @@ def seed_data():
             start_time=fake.date_time_this_month(),
             end_time=fake.date_time_this_month(),
             date_of_event=fake.date_this_month(),
+            category = random.choice(['Fun', 'Education', 'Social']),
             created_at=datetime.now(),
             updated_at=datetime.now(),
             user_id=random.randint(1, 50)

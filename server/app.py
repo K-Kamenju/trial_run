@@ -176,6 +176,7 @@ def get_events():
         'start_time': event.start_time, 
         'end_time': event.end_time, 
         'date_of_event': event.date_of_event,
+        'category': event.category,
         'comments':[{
             'id': comment.id,
             'text': comment.text, 
@@ -201,6 +202,7 @@ def get_user_events():
             'start_time': event.start_time.strftime('%I:%M %p'),  # Format start time
             'end_time': event.end_time.strftime('%I:%M %p'),  # Format end time
             'date_of_event': event.date_of_event.strftime('%d %b %Y'),  # Format date
+            'category': event.category,
             'comments': []
         }
         
@@ -241,6 +243,7 @@ def add_event():
         start_time=start_datetime,
         end_time=end_datetime,
         date_of_event=date_of_event,
+        category=data['category'],
         image_url=data.get('image_url'),
         user_id=current_user
     )
@@ -281,6 +284,7 @@ def update_event(event_id):
     event.title = data.get('title', event.title)
     event.description = data.get('description', event.description)
     event.image_url = data.get('image_url', event.image_url)
+    event.category = data.get('category', event.category)
 
     db.session.commit()
     return jsonify({'message': 'Event updated successfully'})
@@ -341,6 +345,119 @@ def delete_comment(comment_id):
     
     return jsonify({'message': 'Comment deleted successfully'})
 
+
+@app.route('/upcoming-events', methods=['GET'])
+def get_upcoming_events():
+    current_date = datetime.now()
+    upcoming_events = Events.query.filter(Events.date_of_event >= current_date).order_by(Events.date_of_event).limit(10).all()
+    
+    output = []
+    for event in upcoming_events:
+        event_data = {
+            'id': event.id,
+            'title': event.title,
+            'description': event.description,
+            'start_time': event.start_time.strftime('%I:%M %p'),  # Format start time
+            'end_time': event.end_time.strftime('%I:%M %p'),  # Format end time
+            'date_of_event': event.date_of_event.strftime('%d %b %Y'),  # Format date
+            'category': event.category,
+            'comments': []
+        }
+        
+        # Fetch comments for the current event
+        comments = Comment_events.query.filter_by(event_id=event.id).all()
+        for comment in comments:
+            comment_data = {
+                'id': comment.id,
+                'text': comment.text,
+                'username': comment.user.username,
+                'image_url': comment.user.image_url
+            }
+            event_data['comments'].append(comment_data)
+        
+        output.append(event_data)
+    
+    return jsonify({'upcoming_events': output})
+
+
+@app.route('/past-events', methods=['GET'])
+def get_past_events():
+    current_date = datetime.now()
+    past_events = Events.query.filter(Events.date_of_event < current_date).all()
+    
+    output = []
+    for event in past_events:
+        event_data = {
+            'id': event.id,
+            'title': event.title,
+            'description': event.description,
+            'start_time': event.start_time.strftime('%I:%M %p'),  # Format start time
+            'end_time': event.end_time.strftime('%I:%M %p'),  # Format end time
+            'date_of_event': event.date_of_event.strftime('%d %b %Y'),  # Format date
+            'category': event.category,
+            'comments': []
+        }
+        
+        # Fetch comments for the current event
+        comments = Comment_events.query.filter_by(event_id=event.id).all()
+        for comment in comments:
+            comment_data = {
+                'id': comment.id,
+                'text': comment.text,
+                'username': comment.user.username,
+                'image_url': comment.user.image_url
+            }
+            event_data['comments'].append(comment_data)
+        
+        output.append(event_data)
+    
+    return jsonify({'past_events': output})
+
+
+def get_event_by_category(category):
+    events = Events.query.filter_by(category=category).all()
+    
+    output = []
+    for event in events:
+        event_data = {
+            'id': event.id,
+            'title': event.title,
+            'description': event.description,
+            'start_time': event.start_time.strftime('%I:%M %p'),  # Format start time
+            'end_time': event.end_time.strftime('%I:%M %p'),  # Format end time
+            'date_of_event': event.date_of_event.strftime('%d %b %Y'),  # Format date
+            'category': event.category,
+            'comments': []
+        }
+        
+        # Fetch comments for the current event
+        comments = Comment_events.query.filter_by(event_id=event.id).all()
+        for comment in comments:
+            comment_data = {
+                'id': comment.id,
+                'text': comment.text,
+                'username': comment.user.username,
+                'image_url': comment.user.image_url
+            }
+            event_data['comments'].append(comment_data)
+        
+        output.append(event_data)
+        
+    return jsonify({'events': output})
+
+@app.route('/events/fun', methods=['GET'])
+def get_events_fun():
+    return get_event_by_category('Fun')
+
+@app.route('/events/education', methods=['GET'])
+def get_events_education():
+    return get_event_by_category('Education')
+
+@app.route('/events/social', methods=['GET'])
+def get_events_social():
+    return get_event_by_category('Social')
+
+
 '''
 
 END OF EVENT ROUTES
@@ -381,6 +498,32 @@ def get_fun_times():
     
     return jsonify({'fun_times': output})
 
+@app.route('/user-fun_times', methods=['GET'])
+@jwt_required()
+def get_user_fun_times():
+    current_user = get_jwt_identity()
+    user_fun_times = Fun_times.query.filter_by(user_id=current_user).all()
+
+    output = []
+    for fun_time in user_fun_times:
+        total_likes = db.session.query(func.count(Likes.id)).filter(Likes.fun_time_id == fun_time.id).scalar()
+        fun_time_data = {
+            'id': fun_time.id,
+            'description': fun_time.description,
+            'image_url': fun_time.image_url,
+            'category': fun_time.category,
+            'total_likes': total_likes,
+            'comments': [{
+                'id': comment.id,
+                'text': comment.text,
+                'username': comment.user.username
+            } for comment in fun_time.comments]
+        }
+        output.append(fun_time_data)
+
+    return jsonify({'user_fun_times': output})
+
+
 @app.route('/add-fun_time', methods=['POST'])
 @jwt_required()
 def add_fun_time():
@@ -401,6 +544,7 @@ def update_fun_time(fun_time_id):
     data = request.get_json()
     fun_time.description = data.get('description', fun_time.description)
     fun_time.category = data.get('category', fun_time.category)
+    fun_time.image_url = data.get('image_url', fun_time.image_url)
     db.session.commit()
     return jsonify({'message': 'Fun-Time updated successfully'})
 
@@ -416,7 +560,7 @@ def delete_fun_time(fun_time_id):
     return jsonify({'message': 'Fun-Time deleted successfully'})
 
 # Route for most liked Fun-Time
-@app.route('/most-liked-fun-time', methods=['GET'])
+@app.route('/most-liked-fun_time', methods=['GET'])
 def most_liked_fun_time():
     most_liked = db.session.query(Fun_times, func.count(Likes.id).label('like_count')).\
         outerjoin(Likes).\
@@ -437,6 +581,133 @@ def most_liked_fun_time():
             'like_count': like_count
         }
     })
+
+@app.route('/comment-fun_time/<int:fun_time_id>', methods=['POST'])
+@jwt_required()
+def comment_fun_time(fun_time_id):
+    current_user = get_jwt_identity()
+    fun_time = Fun_times.query.get(fun_time_id)
+    
+    if not fun_time:
+        return jsonify({'message': 'Fun-Time not found'}), 404
+    
+    data = request.get_json()
+    comment_text = data.get('text')
+    
+    if not comment_text:
+        return jsonify({'message': 'Comment text is required'}), 400
+    
+    new_comment = Comment_fun_times(
+        text=comment_text,
+        user_id=current_user,
+        fun_time_id=fun_time_id
+    )
+    
+    db.session.add(new_comment)
+    db.session.commit()
+    
+    return jsonify({'message': 'Comment added successfully'})
+
+@app.route('/delete-comment-fun_time/<int:comment_id>', methods=['DELETE'])
+@jwt_required()
+def delete_comment_fun_time(comment_id):
+    current_user = get_jwt_identity()
+    comment = Comment_fun_times.query.get(comment_id)
+    
+    if not comment:
+        return jsonify({'message': 'Comment not found'}), 404
+    
+    if comment.user_id != current_user:
+        return jsonify({'message': 'You are not authorized to delete this comment'}), 403
+    
+    db.session.delete(comment)
+    db.session.commit()
+    
+    return jsonify({'message': 'Comment deleted successfully'})
+
+@app.route('/toggle-like-fun_time/<int:fun_time_id>', methods=['POST'])
+@jwt_required()
+def toggle_like_fun_time(fun_time_id):
+    current_user = get_jwt_identity()
+    fun_time = Fun_times.query.get(fun_time_id)
+    
+    if not fun_time:
+        return jsonify({'message': 'Fun-Time not found'}), 404
+    
+    existing_like = Likes.query.filter_by(user_id=current_user, fun_time_id=fun_time_id).first()
+    if existing_like:
+        # Unlike if already liked
+        db.session.delete(existing_like)
+        db.session.commit()
+        return jsonify({'message': 'Fun-Time unliked successfully'})
+    else:
+        # Like if not already liked
+        new_like = Likes(user_id=current_user, fun_time_id=fun_time_id)
+        db.session.add(new_like)
+        db.session.commit()
+        return jsonify({'message': 'Fun-Time liked successfully'})
+
+
+def get_fun_times_by_category(category):
+    fun_times = Fun_times.query.filter_by(category=category).all()
+    
+    output = []
+    for fun_time in fun_times:
+        total_likes = db.session.query(func.count(Likes.id)).filter(Likes.fun_time_id == fun_time.id).scalar()
+        fun_time_data = {
+            'id': fun_time.id, 
+            'description': fun_time.description, 
+            'image_url': fun_time.image_url, 
+            'category': fun_time.category,
+            'total_likes': total_likes,
+            'comments': [{
+                'id': comment.id,
+                'text': comment.text,  
+                'username': comment.user.username    
+            } for comment in fun_time.comments]
+        }
+        output.append(fun_time_data)
+    
+    return jsonify({'fun_times': output})
+
+# Route to get latest fun_times
+@app.route('/fun_times/latest', methods=['GET'])
+def get_latest_fun_times():
+    latest_fun_times = Fun_times.query.order_by(Fun_times.created_at.desc()).limit(10).all()
+    
+    output = []
+    for fun_time in latest_fun_times:
+        total_likes = db.session.query(func.count(Likes.id)).filter(Likes.fun_time_id == fun_time.id).scalar()
+        fun_time_data = {
+            'id': fun_time.id, 
+            'description': fun_time.description, 
+            'image_url': fun_time.image_url, 
+            'category': fun_time.category,
+            'total_likes': total_likes,
+            'comments': [{
+                'id': comment.id,
+                'text': comment.text,  
+                'username': comment.user.username    
+            } for comment in fun_time.comments]
+        }
+        output.append(fun_time_data)
+    
+    return jsonify({'fun_times': output})
+
+# Route to get funny fun_times
+@app.route('/fun_times/funny', methods=['GET'])
+def get_funny_fun_times():
+    return get_fun_times_by_category('Funny')
+
+# Route to get educational fun_times
+@app.route('/fun_times/educational', methods=['GET'])
+def get_educational_fun_times():
+    return get_fun_times_by_category('Educational')
+
+# Route to get events fun_times
+@app.route('/fun_times/events', methods=['GET'])
+def get_events_fun_times():
+    return get_fun_times_by_category('Events')
 
 
 

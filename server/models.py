@@ -43,6 +43,7 @@ class Events(db.Model, SerializerMixin):
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
     date_of_event = db.Column(db.DateTime)
+    category = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
