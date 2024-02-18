@@ -521,6 +521,8 @@ def get_product(product_id):
     
     return jsonify({'product': {
         'id': product.id, 
+        'username': product.user.last_name,
+        'phone_number': product.user.phone_no,
         'title': product.title, 
         'description': product.description, 
         'price': product.price,
