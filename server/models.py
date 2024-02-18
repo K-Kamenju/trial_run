@@ -1,30 +1,22 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import validates
-from sqlalchemy import MetaData, UniqueConstraint, ForeignKey, Table
-
+from sqlalchemy import MetaData
+from datetime import datetime
+from sqlalchemy_serializer import SerializerMixin
 
 # Define metadata with a naming convention for foreign keys
 metadata = MetaData(naming_convention={
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
 })
 
-db = SQLAlchemy(metadata =  metadata)
-
-from datetime import datetime
-from flask_sqlalchemy import SQLAlchemy
-
-from sqlalchemy_serializer import SerializerMixin
-
 db = SQLAlchemy()
 
 class Users(db.Model, SerializerMixin):
-    
-    serialize_rules = ('-events.user','-fun_times.user','-comments_on_events.user', '-comments_on_fun_times.user','-products.user','-reviews.user',)
+    __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True)
-    
     first_name = db.Column(db.String(255), nullable=False)
     last_name = db.Column(db.String(255), nullable=False)
+    username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     phone_no = db.Column(db.String(20), nullable=False)
@@ -33,20 +25,7 @@ class Users(db.Model, SerializerMixin):
     gender = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    first_name = db.Column(db.String(255))
-    last_name = db.Column(db.String(255))
-    student_id = db.Column(db.String(100))
-    email = db.Column(db.String(255))
-    phone_no = db.Column(db.Integer)
-    category = db.Column(db.String(50))
-    image_url = db.Column(db.String(255))
-    gender = db.Column(db.String(10))
-    password = db.Column(db.String(55))
-    created_at = db.Column(db.DateTime)
-    updated_at = db.Column(db.DateTime)
     
-    # Relationships
     events = db.relationship('Events', backref='user', lazy=True)
     fun_times = db.relationship('Fun_times', backref='user', lazy=True)
     comments_on_events = db.relationship('Comment_events', backref='user', lazy=True)
@@ -55,32 +34,22 @@ class Users(db.Model, SerializerMixin):
     reviews = db.relationship('Reviews', backref='user', lazy=True)
 
 class Events(db.Model, SerializerMixin):
-    
-    serialize_rules = ('-users.events','-comments.event',)
-    
+    __tablename__ = 'events'
     
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255))
     description = db.Column(db.String(255))
     image_url = db.Column(db.String(255))
-    start_time = db.Column(db.Integer)
-    end_time = db.Column(db.Integer)
-    date_of_event= db.Column(db.Integer)
+    start_time = db.Column(db.DateTime)
+    end_time = db.Column(db.DateTime)
+    date_of_event = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    start_time = db.Column(db.String(100))
-    end_time = db.Column(db.String(100))
-    date_of_event = db.Column(db.String(100))
-    created_at = db.Column(db.DateTime)
-    updated_at = db.Column(db.DateTime)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     comments = db.relationship('Comment_events', backref='event', lazy=True)
-    
 
 class Products(db.Model, SerializerMixin):
-    
-    serialize_rules = ('-users.products', '-reviews.product',)
+    __tablename__ = 'products'
     
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255))
@@ -88,17 +57,26 @@ class Products(db.Model, SerializerMixin):
     image_url = db.Column(db.String(255))
     price = db.Column(db.Integer)
     category = db.Column(db.String(50))
-    wishlist = db.Column(db.Boolean)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     reviews = db.relationship('Reviews', backref='product', lazy=True)
 
-class Fun_times(db.Model, SerializerMixin):
+class Wishlists(db.Model, SerializerMixin):
+    __tablename__ = 'wishlists'
     
-    serialize_rules = ('-users.fun_times','-comments.fun_time', '-likes.fun_time',)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = db.relationship('Users', backref='wishlists_items', lazy=True)
+    product = db.relationship('Products', backref='wishlists_items', lazy=True)
+
+
+class Fun_times(db.Model, SerializerMixin):
+    __tablename__ = 'fun_times'
     
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(255))
@@ -106,27 +84,19 @@ class Fun_times(db.Model, SerializerMixin):
     category = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    
-    comments = db.relationship('Comment_fun_times', backref='fun_time', lazy=True)
-    created_at = db.Column(db.DateTime)
-    updated_at = db.Column(db.DateTime)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    
-    comments = db.relationship('Comment_fun_times', backref='fun_time', lazy=True) 
+    comments = db.relationship('Comment_fun_times', backref='fun_time', lazy=True)
     likes = db.relationship('Likes', backref='fun_time', lazy=True)
 
 class Likes(db.Model, SerializerMixin):
-    
-    serialize_rules =('-funtimes.likes')
+    __tablename__ = 'likes'
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     fun_time_id = db.Column(db.Integer, db.ForeignKey('fun_times.id'))
 
 class Comment_events(db.Model, SerializerMixin):
-    
-    serialize_rules=('-users.comment_events','-events.comment_events',)
+    __tablename__ = 'comment_events'
     
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(255))
@@ -134,25 +104,79 @@ class Comment_events(db.Model, SerializerMixin):
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
 class Comment_fun_times(db.Model, SerializerMixin):
-    
-    serialize_rules=('-users.comment_fun_times','-fun_times.comment_fun_times',)
+    __tablename__ = 'comment_fun_times'
     
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    fun_times_id = db.Column(db.Integer, db.ForeignKey('fun_times.id'))
+    fun_time_id = db.Column(db.Integer, db.ForeignKey('fun_times.id'))
 
 class Reviews(db.Model, SerializerMixin):
-    
-    serialize_rules=('-users.reviews','-products.reviews',)
+    __tablename__ = 'reviews'
     
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(255))
     rating = db.Column(db.Float)
-
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
 
+# Serialization rules
+Users.serialize_rules = (
+    '-events.user',
+    '-fun_times.user',
+    '-comments_on_events.user',
+    '-comments_on_fun_times.user',
+    '-products.user',
+    '-reviews.user',
+)
+
+Events.serialize_rules = (
+    '-users.events',
+    '-comments.event',
+)
+
+Products.serialize_rules = (
+    '-users.products',
+    '-reviews.product',
+)
+
+Fun_times.serialize_rules = (
+    '-users.fun_times',
+    '-comments.fun_time',
+    '-likes.fun_time',
+)
+
+Likes.serialize_rules = (
+    '-fun_times.likes',
+)
+
+Comment_events.serialize_rules = (
+    '-users.comment_events',
+    '-events.comment_events',
+)
+
+Comment_fun_times.serialize_rules = (
+    '-users.comment_fun_times',
+    '-fun_times.comment_fun_times',
+)
+
+Reviews.serialize_rules = (
+    '-users.reviews',
+    '-products.reviews',
+)
+
+Wishlists.serialize_rules = (
+    'user.id',
+    'user.first_name',
+    'user.last_name', 
+    'user.email',
+    'user.phone_no',
+    'user.image_url',
+    'product.id',
+    'product.title',      
+    'product.description',
+    'product.price'
+)
 
 # {
 #   "first_name":"Mike",

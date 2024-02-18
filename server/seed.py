@@ -18,13 +18,12 @@ def seed_data():
             email=fake.email(),
             phone_no=fake.phone_number(),
             password=fake.password(),
-            category='user',
+            category=random.choice(['Software Dev', 'Data Science', 'Cybersec', 'UI/UX']),
             image_url='https://example.com/john.jpg',
             gender=random.choice(['male', 'female']),
-            password=fake.password(),
             created_at=datetime.now(),
             updated_at=datetime.now(),
-            student_id=fake.phone_number()
+            username=fake.user_name()
         )
         db.session.add(user)
     db.session.commit()
@@ -41,7 +40,6 @@ def seed_data():
             image_url=fake.image_url(),
             price=random.randint(10, 1000),
             category=random.choice(product_categories),
-            wishlist=random.choice([True, False]),
             created_at=datetime.now(),
             updated_at=datetime.now(),
             user_id=random.randint(1, 50)
@@ -116,10 +114,11 @@ def seed_data():
             comment_fun_time = Comment_fun_times(
                 text=fake.paragraph(),
                 user_id=random.randint(1, 50),
-                fun_times_id=fun_time.id
+                fun_time_id=fun_time.id  # Corrected attribute name
             )
             db.session.add(comment_fun_time)
     db.session.commit()
+
     
 if __name__ == '__main__':
    with app.app_context():
