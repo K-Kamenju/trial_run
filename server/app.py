@@ -212,6 +212,7 @@ def get_fun_times():
     
     output = [{
         'id': fun_time.id, 
+        'username': fun_time.user.last_name,
         'description': fun_time.description, 
         'image_url':fun_time.image_url, 
         'category': fun_time.category,
@@ -273,6 +274,7 @@ def get_marketplace():
     products = Products.query.all()
     output = [{
         'id': product.id, 
+        'username': product.user.last_name,
         'title': product.title, 
         'description': product.description,
         'price': product.price, 
@@ -290,6 +292,8 @@ def get_product(product_id):
         return jsonify({'message': 'Product not found'}), 404
     return jsonify({'product': {
         'id': product.id, 
+        'username': product.user.last_name,
+        'phone_number': product.user.phone_no,
         'title': product.title, 
         'description': product.description, 
         'price': product.price,
