@@ -16,6 +16,7 @@ def seed_data():
             first_name=fake.first_name(),
             last_name=fake.last_name(),
             email=fake.email(),
+            student_id=fake.ssn(),
             phone_no=fake.phone_number(),
             password=fake.password(),
             category=random.choice(['Software Dev', 'Data Science', 'Cybersec', 'UI/UX']),
@@ -104,7 +105,9 @@ def seed_data():
             comment_event = Comment_events(
                 text=fake.paragraph(),
                 user_id=random.randint(1, 50),
-                event_id=event.id
+                event_id=event.id,
+                created_at=datetime.now(),
+                updated_at=datetime.now()
             )
             db.session.add(comment_event)
     db.session.commit()
@@ -115,7 +118,9 @@ def seed_data():
             comment_fun_time = Comment_fun_times(
                 text=fake.paragraph(),
                 user_id=random.randint(1, 50),
-                fun_time_id=fun_time.id  # Corrected attribute name
+                fun_time_id=fun_time.id , # Corrected attribute name,
+                created_at=datetime.now(),
+                updated_at=datetime.now()
             )
             db.session.add(comment_fun_time)
     db.session.commit()

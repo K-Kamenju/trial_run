@@ -1,8 +1,8 @@
-"""FIrst MIgration
+"""Creating tables
 
-Revision ID: c9a22bcb45f3
+Revision ID: 28a13df6c8b9
 Revises: 
-Create Date: 2024-02-18 14:27:26.691569
+Create Date: 2024-02-19 12:19:00.065836
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'c9a22bcb45f3'
+revision = '28a13df6c8b9'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -43,6 +43,7 @@ def upgrade():
     sa.Column('start_time', sa.DateTime(), nullable=True),
     sa.Column('end_time', sa.DateTime(), nullable=True),
     sa.Column('date_of_event', sa.DateTime(), nullable=True),
+    sa.Column('category', sa.String(length=50), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
@@ -76,6 +77,8 @@ def upgrade():
     op.create_table('comment_events',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('text', sa.String(length=255), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('event_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['event_id'], ['events.id'], ),
@@ -85,6 +88,8 @@ def upgrade():
     op.create_table('comment_fun_times',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('text', sa.String(length=255), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('fun_time_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['fun_time_id'], ['fun_times.id'], ),
@@ -103,6 +108,8 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('text', sa.String(length=255), nullable=True),
     sa.Column('rating', sa.Float(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('product_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),

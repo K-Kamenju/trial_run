@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from datetime import datetime
 from sqlalchemy_serializer import SerializerMixin
+from sqlalchemy.orm import validates
 
 # Define metadata with a naming convention for foreign keys
 metadata = MetaData(naming_convention={
@@ -17,6 +18,7 @@ class Users(db.Model, SerializerMixin):
     first_name = db.Column(db.String(255), nullable=False)
     last_name = db.Column(db.String(255), nullable=False)
     username = db.Column(db.String(100), unique=True, nullable=False)
+    student_id = db.Column(db.String(10), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     phone_no = db.Column(db.String(20), nullable=False)
@@ -101,6 +103,8 @@ class Comment_events(db.Model, SerializerMixin):
     
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
@@ -109,6 +113,8 @@ class Comment_fun_times(db.Model, SerializerMixin):
     
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     fun_time_id = db.Column(db.Integer, db.ForeignKey('fun_times.id'))
 
@@ -118,6 +124,8 @@ class Reviews(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(255))
     rating = db.Column(db.Float)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
 

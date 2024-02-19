@@ -46,6 +46,7 @@ def signup():
         first_name=data['first_name'],
         last_name=data['last_name'],
         username = data['username'],
+        student_id = data['student_id'],
         email=data['email'],
         password=hashed_password,
         phone_no=data['phone_no'],
@@ -117,6 +118,7 @@ def get_profile():
             'first_name': user.first_name,
             'last_name': user.last_name,
             'username': user.username,
+            'student_id': user.student_id,
             'email': user.email,
             'phone_no': user.phone_no,
             'category': user.category,
@@ -518,7 +520,10 @@ def get_fun_times():
             'comments': [{
                 'id': comment.id,
                 'text': comment.text,  
-                'username': comment.user.username    
+                'username': comment.user.username ,
+                'image_url': comment.user.image_url , 
+                'created_at': comment.created_at,
+                'updated_at': comment.updated_at
             } for comment in fun_time.comments]
         }
         output.append(fun_time_data)
@@ -712,6 +717,7 @@ def get_fun_times_by_category(category):
             'image_url': fun_time.image_url, 
             'category': fun_time.category,
             'total_likes': total_likes,
+           
             'comments': [{
                 'id': comment.id,
                 'text': comment.text,  
@@ -735,6 +741,7 @@ def get_latest_fun_times():
             'description': fun_time.description, 
             'image_url': fun_time.image_url, 
             'category': fun_time.category,
+            'created_at': fun_time.created_at,
             'total_likes': total_likes,
             'comments': [{
                 'id': comment.id,
