@@ -16,7 +16,6 @@ def seed_data():
             first_name=fake.first_name(),
             last_name=fake.last_name(),
             email=fake.email(),
-            student_id=fake.ssn(),
             phone_no=fake.phone_number(),
             password=fake.password(),
             category=random.choice(['Software Dev', 'Data Science', 'Cybersec', 'UI/UX']),

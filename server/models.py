@@ -18,7 +18,6 @@ class Users(db.Model, SerializerMixin):
     first_name = db.Column(db.String(255), nullable=False)
     last_name = db.Column(db.String(255), nullable=False)
     username = db.Column(db.String(100), unique=True, nullable=False)
-    student_id = db.Column(db.String(10), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     phone_no = db.Column(db.String(20), nullable=False)
