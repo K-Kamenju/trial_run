@@ -41,7 +41,7 @@ python server/seed.py
 ## Routes
 
 The following are the routes the application requires. 
-![](/images/routes.pdf)
+![routes](./images/routes.pdf)
 
 
 ## Set Up/ Installation 
