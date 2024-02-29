@@ -1,4 +1,4 @@
-# PHASE--5-SEV-0
+# CHUO YANGU
 
 # Table of Contents
 * Introduction
@@ -21,8 +21,16 @@ flask db upgrade
 ```
 
 The following relationships are implemented:
-
-
+- `Users <-> Events`: One-to-Many relationship. A user can organize many events, but each event is associated with only one user. 
+- `Users <-> Products`: One-to-Many relationship. A user can list many products for sale, but each product is associated with only one user. 
+- `Users <-> Comment_events`: One-to-Many relationship. A user can comment on many events, but each comment is associated with only one user. 
+- `Users <-> Comment_fun_times`: One-to-Many relationship. A user can comment on many fun times, but each comment is associated with only one user. 
+- `Users <-> Reviews`: One-to-Many relationship. A user can review many products, but each review is associated with only one user. 
+- `Users <-> Wishlists`: One-to-Many relationship. A user can have many products in their wishlist, but each wishlist item is associated with only one user. 
+- `Events <-> Comment_events`: One-to-Many relationship. An event can have many comments, but each comment is associated with only one event.
+- `Products <-> Reviews`: One-to-Many relationship. A product can have many reviews, but each review is associated with only one product.
+- `Fun_times <-> Comment_fun_times`: One-to-Many relationship. A fun time activity can have many comments, but each comment is associated with only one fun time activity.
+- `Fun_times <-> Likes`: One-to-Many relationship. A fun time activity can have many likes, but each like is associated with only one fun time activity.
 
 
 You can seed the database:
@@ -37,14 +45,13 @@ python server/seed.py
 
 ## Routes
 
-The following are the routes the application requires. 
+The following are the routes used within the application. 
 
 ![routes](/images/1.image.png)
 
 ![routes](/images/2.image.png)
 
 ![routes](/images/3.image.png)
-
 
 
 ## Set Up/ Installation 
