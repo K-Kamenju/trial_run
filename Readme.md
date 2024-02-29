@@ -39,11 +39,11 @@ python server/seed.py
 
 The following are the routes the application requires. 
 
-![routes](/images/1.image.png.pdf)
+![routes](/images/1.image.png)
 
-![routes](/images/2.image.png.pdf)
+![routes](/images/2.image.png)
 
-![routes](/images/3.image.png.pdf)
+![routes](/images/3.image.png)
 
 
 
