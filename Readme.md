@@ -10,7 +10,39 @@
 
 ## Introduction
 
-## Deliverables
+- In this project flask and python was used to create the back-end.
+- Javascript and React for the front-end.
+- Styling was done using css, bootsrap, sweetalert among others.
+
+## Description
+
+**CHUO YANGU** attempts to solve the problem of communication within universities, schools or colleges. The application is designed to bring information much closer to the student/s in a fast, efficient and reliable manner. 
+
+A user can:
+  - A user can sign up to create an account.
+
+An authenticated user:
+  - Log-in into their account. 
+  - Reset their password.
+  - Update the information on their profile.
+  - View all posted events. 
+  - Comment on a posted event .
+  - Post an event.
+  - Edit the event they posted.
+  - Delete the event they posted.
+  - View all Fun-Times that have been posted.
+  - Like a specific Fun-Time.
+  - Comment on a specific Fun-Time.
+  - Post a Fun-Time.
+  - Edit the Fun-Time they posted.
+  - Delete the Fun-Time they posted.
+  - View all products being sold.
+  - Star a specific product for future reference.
+  - Post a product .
+  - Edit the information about the product they posted.
+  - Delete the product they posted."
+
+
 ## Models
 
 The file `server/models.py` defines the model classes and its relationships**.
