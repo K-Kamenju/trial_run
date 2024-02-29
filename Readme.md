@@ -1,6 +1,5 @@
 # PHASE--5-SEV-0
 
-
 # Table of Contents
 * Introduction
 * Description
@@ -8,8 +7,6 @@
 * Known Bugs
 * Technologies used
 * License
-* Support
-
 
 ## Introduction
 
@@ -17,7 +14,7 @@
 ## Models
 
 The file `server/models.py` defines the model classes and its relationships**.
-Use the following commands to create the initial database `db.sqlite`:
+Use the following commands to create the initial database `test.db`:
 
 ```console
 flask db upgrade 
@@ -41,7 +38,7 @@ python server/seed.py
 ## Routes
 
 The following are the routes the application requires. 
-[routes](./images/routes.pdf)
+![routes](./files/routes.pdf)
 
 
 ## Set Up/ Installation 
